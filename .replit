@@ -1,4 +1,4 @@
-run = "python3 sq.py"
+run = "python3 que.py"
 modules = ["python-3.11"]
 
 [nix]
