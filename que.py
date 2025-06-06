@@ -1,3 +1,8 @@
+import os
+
+TOKEN = os.getenv('BOT_TOKEN')
+updater = Updater(TOKEN, use_context=True)
+
 import logging
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters, ConversationHandler
@@ -6,8 +11,7 @@ from ques import QUESTIONS  # Import your questions dict
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +21,21 @@ CHOOSE_TOPIC, ASK_QUESTION = range(2)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     keyboard = [[KeyboardButton(topic)] for topic in QUESTIONS.keys()]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-    await update.message.reply_text("Welcome to the Aptitude Quiz Bot!\nPlease choose a topic:", reply_markup=reply_markup)
+    reply_markup = ReplyKeyboardMarkup(keyboard,
+                                       one_time_keyboard=True,
+                                       resize_keyboard=True)
+    await update.message.reply_text(
+        "Welcome to the Aptitude Quiz Bot!\nPlease choose a topic:",
+        reply_markup=reply_markup)
     return CHOOSE_TOPIC
 
 
-async def choose_topic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def choose_topic(update: Update,
+                       context: ContextTypes.DEFAULT_TYPE) -> int:
     topic = update.message.text
     if topic not in QUESTIONS:
-        await update.message.reply_text("Invalid topic. Please choose from the list.")
+        await update.message.reply_text(
+            "Invalid topic. Please choose from the list.")
         return CHOOSE_TOPIC
 
     # Store user's quiz data in context.user_data
@@ -36,25 +46,32 @@ async def choose_topic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     return await ask_question(update, context)
 
 
-async def ask_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def ask_question(update: Update,
+                       context: ContextTypes.DEFAULT_TYPE) -> int:
     topic = context.user_data['topic']
     index = context.user_data['question_index']
 
     if index >= len(QUESTIONS[topic]):
         score = context.user_data['score']
-        await update.message.reply_text(f"Quiz finished! Your score: {score}/{len(QUESTIONS[topic])}")
+        await update.message.reply_text(
+            f"Quiz finished! Your score: {score}/{len(QUESTIONS[topic])}")
         return ConversationHandler.END
 
     question = QUESTIONS[topic][index]
     keyboard = [[KeyboardButton(opt)] for opt in question['options']]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-    await update.message.reply_text(f"{question['question']}", reply_markup=reply_markup)
+    reply_markup = ReplyKeyboardMarkup(keyboard,
+                                       one_time_keyboard=True,
+                                       resize_keyboard=True)
+    await update.message.reply_text(f"{question['question']}",
+                                    reply_markup=reply_markup)
     return ASK_QUESTION
 
 
-async def handle_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def handle_answer(update: Update,
+                        context: ContextTypes.DEFAULT_TYPE) -> int:
     if 'topic' not in context.user_data:
-        await update.message.reply_text("Please start a quiz first using /start")
+        await update.message.reply_text(
+            "Please start a quiz first using /start")
         return ConversationHandler.END
 
     topic = context.user_data['topic']
@@ -68,7 +85,8 @@ async def handle_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         context.user_data['score'] += 1
         await update.message.reply_text("✅ Correct!")
     else:
-        await update.message.reply_text(f"❌ Wrong! Correct answer: {correct_answer_text}")
+        await update.message.reply_text(
+            f"❌ Wrong! Correct answer: {correct_answer_text}")
 
     context.user_data['question_index'] += 1
     return await ask_question(update, context)
@@ -87,11 +105,12 @@ if __name__ == '__main__':
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            CHOOSE_TOPIC: [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_topic)],
-            ASK_QUESTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_answer)],
+            CHOOSE_TOPIC:
+            [MessageHandler(filters.TEXT & ~filters.COMMAND, choose_topic)],
+            ASK_QUESTION:
+            [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_answer)],
         },
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
+        fallbacks=[CommandHandler('cancel', cancel)])
 
     app.add_handler(conv_handler)
 

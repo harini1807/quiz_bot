@@ -1,0 +1,4 @@
+run = "python3 sq.py"
+modules = ["python-3.11"]
+
+[nix]
