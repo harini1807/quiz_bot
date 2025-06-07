@@ -1,6 +1,9 @@
+from keep_alive import keep_alive  # ✅ Step 1: Import keep_alive
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import (ApplicationBuilder, CommandHandler, ContextTypes,
-                          MessageHandler, filters, ConversationHandler)
+from telegram.ext import (
+    ApplicationBuilder, CommandHandler, ContextTypes,
+    MessageHandler, filters, ConversationHandler
+)
 import os
 import logging
 
@@ -83,6 +86,8 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 if __name__ == '__main__':
+    keep_alive()  # ✅ Step 2: Call it before starting the bot
+
     BOT_TOKEN = os.getenv('BOT_TOKEN')
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 

@@ -2,3 +2,7 @@ run = "python3 que.py"
 modules = ["python-3.11"]
 
 [nix]
+
+[[ports]]
+localPort = 8080
+externalPort = 80
